@@ -35,7 +35,7 @@ public class UpdateTodoListCommandHandler : IRequestHandler<UpdateTodoListComman
         }
 
         entity.Title = request.Title;
-        entity.Colour = Colour.From(request.Colour);
+        entity.Colour = Colour.From(request.Colour ?? Colour.White);
 
         await _context.SaveChangesAsync(cancellationToken);
 
