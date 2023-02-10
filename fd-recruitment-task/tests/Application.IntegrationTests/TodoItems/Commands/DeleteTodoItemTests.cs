@@ -22,7 +22,7 @@ public class DeleteTodoItemTests : BaseTestFixture
     }
 
     [Test]
-    public async Task ShouldDeleteTodoItem()
+    public async Task ShouldSoftDeleteTodoItem()
     {
         var listId = await SendAsync(new CreateTodoListCommand
         {
@@ -39,6 +39,8 @@ public class DeleteTodoItemTests : BaseTestFixture
 
         var item = await FindAsync<TodoItem>(itemId);
 
-        item.Should().BeNull();
+        item.Should().NotBeNull();
+        if (item != null) 
+            item.IsSoftDeleted.Should().BeTrue();
     }
 }
