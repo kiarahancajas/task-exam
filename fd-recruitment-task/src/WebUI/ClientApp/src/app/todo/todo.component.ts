@@ -1,11 +1,11 @@
 import { Component, TemplateRef, OnInit } from '@angular/core';
-import { FormBuilder } from '@angular/forms';
+import {FormArray, FormBuilder, FormControl, FormGroup} from '@angular/forms';
 import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
 import {
   TodoListsClient, TodoItemsClient,
   TodoListDto, TodoItemDto, PriorityLevelDto,
   CreateTodoListCommand, UpdateTodoListCommand,
-  CreateTodoItemCommand, UpdateTodoItemDetailCommand
+  CreateTodoItemCommand, UpdateTodoItemDetailCommand, TagsDto
 } from '../web-api-client';
 
 @Component({
@@ -28,20 +28,49 @@ export class TodoComponent implements OnInit {
   listOptionsModalRef: BsModalRef;
   deleteListModalRef: BsModalRef;
   itemDetailsModalRef: BsModalRef;
-  itemDetailsFormGroup = this.fb.group({
-    id: [null],
-    listId: [null],
-    priority: [''],
-    note: ['']
-  });
+  itemDetailsFormGroup: any = {};
+  createTagsFormArray(tags: TagsDto[]): FormGroup[] {
+    const tagsFormArray: FormGroup[] = [];
+    if (tags && tags.length) {
+      tags.forEach(tag => {
+        tagsFormArray.push(this.createTagFormGroup(tag));
+      });
+    }
+    return tagsFormArray;
+  }
+  createTagFormGroup(tag: TagsDto): FormGroup {
+    return this.fb.group({
+      id: [tag.id],
+      itemId: [tag.itemId],
+      name: [tag.name]
+    });
+  }
 
+  get tags(): FormArray {
+    return this.itemDetailsFormGroup.get('tags') as FormArray;
+  }
+
+  addTag() {
+    let newTag = new TagsDto({
+      id: 0,
+      itemId: this.selectedItem.id,
+      name:''
+    });
+    this.tags.push(this.createTagFormGroup(newTag));
+  }
+
+  removeTag(index) {
+    let tagsArray = this.itemDetailsFormGroup.get('tags') as FormArray;
+    tagsArray.removeAt(index);
+  }
 
   constructor(
     private listsClient: TodoListsClient,
     private itemsClient: TodoItemsClient,
     private modalService: BsModalService,
     private fb: FormBuilder
-  ) { }
+  ) {}
+
 
   ngOnInit(): void {
     this.listsClient.get().subscribe(
@@ -89,8 +118,10 @@ export class TodoComponent implements OnInit {
       error => {
         const errors = JSON.parse(error.response);
 
-        if (errors && errors.Title) {
-          this.newListEditor.error = errors.Title[0];
+        if (errors && errors.errors.Title.length > 0) {
+          this.newListEditor.error = errors.errors.Title[0];
+        } else {
+          console.error('Error: Title array is not defined or is empty');
         }
 
         setTimeout(() => document.getElementById('title').focus(), 250);
@@ -138,6 +169,15 @@ export class TodoComponent implements OnInit {
   // Items
   showItemDetailsModal(template: TemplateRef<any>, item: TodoItemDto): void {
     this.selectedItem = item;
+    let value = this.selectedItem && this.selectedItem.tags ? this.createTagsFormArray(this.selectedItem.tags) : [] ? this.createTagsFormArray(this.selectedItem.tags) : [];
+    this.itemDetailsFormGroup = this.fb.group({
+      id: [null],
+      listId: [null],
+      priority: [''],
+      note: [''],
+      tags: this.fb.array(value)
+    });
+
     this.itemDetailsFormGroup.patchValue(this.selectedItem);
 
     this.itemDetailsModalRef = this.modalService.show(template);
@@ -163,12 +203,25 @@ export class TodoComponent implements OnInit {
 
         this.selectedItem.priority = item.priority;
         this.selectedItem.note = item.note;
+        this.selectedItem.tags = item.tags;
+
         this.itemDetailsModalRef.hide();
         this.itemDetailsFormGroup.reset();
       },
-      error => console.error(error)
+      error => {
+        const errors = JSON.parse(error.response);
+
+        if (errors && errors.errors.Tags.length > 0) {
+          this.itemDetailsFormGroup.error = errors.errors.Tags[0];
+        } else {
+          console.error('Error: Tags array is not defined or is empty');
+        }
+
+        setTimeout(() => document.getElementById('title').focus(), 250);
+      }
     );
   }
+
 
   addItem() {
     const item = {
@@ -176,7 +229,8 @@ export class TodoComponent implements OnInit {
       listId: this.selectedList.id,
       priority: this.priorityLevels[0].value,
       title: '',
-      done: false
+      done: false,
+      tags: []
     } as TodoItemDto;
 
     this.selectedList.items.push(item);

@@ -697,7 +697,10 @@ export class PaginatedListOfTodoItemBriefDto implements IPaginatedListOfTodoItem
         if (Array.isArray(this.items)) {
             data["items"] = [];
             for (let item of this.items)
-                data["items"].push(item.toJSON());
+        {
+        	var objTodoItemBriefDto = new TodoItemBriefDto(item);
+        	data["items"].push(objTodoItemBriefDto.toJSON());
+        }
         }
         data["pageNumber"] = this.pageNumber;
         data["totalPages"] = this.totalPages;
@@ -722,6 +725,7 @@ export class TodoItemBriefDto implements ITodoItemBriefDto {
     listId?: number;
     title?: string | undefined;
     done?: boolean;
+    tags?: TagsDto[];
 
     constructor(data?: ITodoItemBriefDto) {
         if (data) {
@@ -738,6 +742,11 @@ export class TodoItemBriefDto implements ITodoItemBriefDto {
             this.listId = _data["listId"];
             this.title = _data["title"];
             this.done = _data["done"];
+            if (Array.isArray(_data["tags"])) {
+                this.tags = [] as any;
+                for (let item of _data["tags"])
+                    this.tags!.push(TagsDto.fromJS(item));
+            }
         }
     }
 
@@ -754,6 +763,14 @@ export class TodoItemBriefDto implements ITodoItemBriefDto {
         data["listId"] = this.listId;
         data["title"] = this.title;
         data["done"] = this.done;
+        if (Array.isArray(this.tags)) {
+            data["tags"] = [];
+            for (let item of this.tags)
+        {
+        	var objTagsDto = new TagsDto(item);
+        	data["tags"].push(objTagsDto.toJSON());
+        }
+        }
         return data;
     }
 }
@@ -763,6 +780,51 @@ export interface ITodoItemBriefDto {
     listId?: number;
     title?: string | undefined;
     done?: boolean;
+    tags?: TagsDto[];
+}
+
+export class TagsDto implements ITagsDto {
+    id?: number;
+    itemId?: number;
+    name?: string | undefined;
+
+    constructor(data?: ITagsDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.itemId = _data["itemId"];
+            this.name = _data["name"];
+        }
+    }
+
+    static fromJS(data: any): TagsDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new TagsDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["itemId"] = this.itemId;
+        data["name"] = this.name;
+        return data;
+    }
+}
+
+export interface ITagsDto {
+    id?: number;
+    itemId?: number;
+    name?: string | undefined;
 }
 
 export class CreateTodoItemCommand implements ICreateTodoItemCommand {
@@ -854,6 +916,7 @@ export class UpdateTodoItemDetailCommand implements IUpdateTodoItemDetailCommand
     listId?: number;
     priority?: PriorityLevel;
     note?: string | undefined;
+    tags?: TagsDto[] | undefined;
 
     constructor(data?: IUpdateTodoItemDetailCommand) {
         if (data) {
@@ -870,6 +933,11 @@ export class UpdateTodoItemDetailCommand implements IUpdateTodoItemDetailCommand
             this.listId = _data["listId"];
             this.priority = _data["priority"];
             this.note = _data["note"];
+            if (Array.isArray(_data["tags"])) {
+                this.tags = [] as any;
+                for (let item of _data["tags"])
+                    this.tags!.push(TagsDto.fromJS(item));
+            }
         }
     }
 
@@ -886,6 +954,14 @@ export class UpdateTodoItemDetailCommand implements IUpdateTodoItemDetailCommand
         data["listId"] = this.listId;
         data["priority"] = this.priority;
         data["note"] = this.note;
+        if (Array.isArray(this.tags)) {
+            data["tags"] = [];
+            for (let item of this.tags)
+        {
+        	var objTagsDto = new TagsDto(item);
+        	data["tags"].push(objTagsDto.toJSON());
+        }
+        }
         return data;
     }
 }
@@ -895,6 +971,7 @@ export interface IUpdateTodoItemDetailCommand {
     listId?: number;
     priority?: PriorityLevel;
     note?: string | undefined;
+    tags?: TagsDto[] | undefined;
 }
 
 export enum PriorityLevel {
@@ -944,12 +1021,18 @@ export class TodosVm implements ITodosVm {
         if (Array.isArray(this.priorityLevels)) {
             data["priorityLevels"] = [];
             for (let item of this.priorityLevels)
-                data["priorityLevels"].push(item.toJSON());
+        {
+        	var objPriorityLevelDto = new PriorityLevelDto(item);
+        	data["priorityLevels"].push(objPriorityLevelDto.toJSON());
+        }
         }
         if (Array.isArray(this.lists)) {
             data["lists"] = [];
             for (let item of this.lists)
-                data["lists"].push(item.toJSON());
+        {
+        	var objTodoListDto = new TodoListDto(item);
+        	data["lists"].push(objTodoListDto.toJSON());
+        }
         }
         return data;
     }
@@ -1043,7 +1126,10 @@ export class TodoListDto implements ITodoListDto {
         if (Array.isArray(this.items)) {
             data["items"] = [];
             for (let item of this.items)
-                data["items"].push(item.toJSON());
+        {
+        	var objTodoItemDto = new TodoItemDto(item);
+        	data["items"].push(objTodoItemDto.toJSON());
+        }
         }
         return data;
     }
@@ -1063,6 +1149,7 @@ export class TodoItemDto implements ITodoItemDto {
     done?: boolean;
     priority?: number;
     note?: string | undefined;
+    tags?: TagsDto[];
 
     constructor(data?: ITodoItemDto) {
         if (data) {
@@ -1081,6 +1168,11 @@ export class TodoItemDto implements ITodoItemDto {
             this.done = _data["done"];
             this.priority = _data["priority"];
             this.note = _data["note"];
+            if (Array.isArray(_data["tags"])) {
+                this.tags = [] as any;
+                for (let item of _data["tags"])
+                    this.tags!.push(TagsDto.fromJS(item));
+            }
         }
     }
 
@@ -1099,6 +1191,14 @@ export class TodoItemDto implements ITodoItemDto {
         data["done"] = this.done;
         data["priority"] = this.priority;
         data["note"] = this.note;
+        if (Array.isArray(this.tags)) {
+            data["tags"] = [];
+            for (let item of this.tags)
+        {
+        	var objTagsDto = new TagsDto(item);
+        	data["tags"].push(objTagsDto.toJSON());
+        }
+        }
         return data;
     }
 }
@@ -1110,6 +1210,7 @@ export interface ITodoItemDto {
     done?: boolean;
     priority?: number;
     note?: string | undefined;
+    tags?: TagsDto[];
 }
 
 export class CreateTodoListCommand implements ICreateTodoListCommand {

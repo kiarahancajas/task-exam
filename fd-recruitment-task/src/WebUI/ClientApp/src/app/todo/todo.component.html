@@ -127,6 +127,26 @@
         <label for="note">Note</label>
         <textarea id="note" class="form-control" rows="3" formControlName="note"></textarea>
       </div>
+      <div class="form-group">
+        <label for="tags">Tags</label>
+        <div formArrayName="tags" class="form-inline">
+          <div *ngFor="let tag of tags.controls; index as i">
+                <div [formGroupName]="i" id="todo-items-tags">
+                  <input type="text" class="form-control mr-2 d-inline-block" formControlName="name" [value]="tag.value.name"
+                  [ngClass]="{ 'is-invalid': itemDetailsFormGroup.error }"/>
+                  <div *ngIf="itemDetailsFormGroup.error" class="invalid-feedback">
+                    {{ itemDetailsFormGroup.error }}
+                  </div>
+                  <input type="hidden" class="form-control" formControlName="itemId" [value]="tag.value.itemId"/>
+                  <input type="hidden" class="form-control" formControlName="id" [value]="tag.value.id"/>
+                  <button class="btn btn-default float-end d-inline-block" title="Remove Tag" (click)="removeTag(i)">
+                    <i class="bi bi-trash"></i>
+                  </button>
+            </div>
+          </div>
+          <button class="btn btn-default ml-2 d-inline-block" (click)="addTag()">Add Tag</button>
+        </div>
+      </div>
     </form>
     <div *ngIf="debug">
       <pre>{{ itemDetailsFormGroup.value | json }}</pre>
