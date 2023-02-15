@@ -35,7 +35,7 @@ public class CreateTodoItemCommandHandler : IRequestHandler<CreateTodoItemComman
         _context.TodoItems.Add(entity);
 
         await _context.SaveChangesAsync(cancellationToken);
-
+        
         return entity.Id;
     }
 }
