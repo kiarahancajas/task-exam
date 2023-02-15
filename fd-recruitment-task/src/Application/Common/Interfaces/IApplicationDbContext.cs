@@ -8,6 +8,8 @@ public interface IApplicationDbContext
     DbSet<TodoList> TodoLists { get; }
 
     DbSet<TodoItem> TodoItems { get; }
+    
+    DbSet<Domain.Entities.Tags> Tags { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }
