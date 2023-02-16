@@ -25,7 +25,10 @@ public class CreateTodoListCommandHandler : IRequestHandler<CreateTodoListComman
         var entity = new TodoList();
 
         entity.Title = request.Title;
-        entity.Colour = Colour.From(request.Colour);
+        if (request.Colour != null)
+        {
+            entity.Colour = Colour.From(request.Colour);
+        }
 
         _context.TodoLists.Add(entity);
 

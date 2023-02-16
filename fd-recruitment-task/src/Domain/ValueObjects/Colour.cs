@@ -17,6 +17,11 @@ public class Colour : ValueObject
 
     public static Colour From(string code)
     {
+        if (code == null)
+        {
+            throw new ArgumentNullException(nameof(code));
+        }
+            
         var colour = new Colour { Code = code };
 
         if (!SupportedColours.Contains(colour))
