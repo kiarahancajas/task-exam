@@ -50,18 +50,18 @@ public class UpdateTodoItemDetailCommandHandler : IRequestHandler<UpdateTodoItem
         
         if (request.Tags != null && request.Tags?.Count > 0)
         {
+            var existingTags = _context.Tags.Where(x => x.ItemId == entity.Id).ToList();
+            //remove all existing tags
+            foreach (var tags in existingTags)
+            {
+                _context.Tags.Remove(tags);
+            }
+            //replace it with the new one
             foreach (var tag in request.Tags)
             {
-                var existingTag = await _context.Tags.FirstOrDefaultAsync(t => t.Name == tag.Name, cancellationToken);
-
-                if (existingTag == null)
-                {
-                    existingTag = new  Domain.Entities.Tags { Name = tag.Name, ItemId = tag.ItemId };
-                    _context.Tags.Add(existingTag);
-                }
-                newTags.Add(existingTag);
+                var newTag = new  Domain.Entities.Tags { Name = tag.Name, ItemId = tag.ItemId };
+                newTags.Add(newTag);
             }
-
         }
 
         entity.Tags = newTags;

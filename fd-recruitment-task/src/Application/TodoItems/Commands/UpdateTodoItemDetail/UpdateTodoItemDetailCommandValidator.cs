@@ -12,8 +12,6 @@ public class UpdateTodoItemDetailCommandValidator : AbstractValidator<UpdateTodo
     {
         _context = context;
 
-        RuleFor(v => v.Note)
-            .NotNull().MaximumLength(200).WithMessage("Note must not exceed 200 characters.");
         RuleFor(v => v.Tags)
             .NotNull().Must(BeUniqueTags).WithMessage("Tags must have unique names.");
     }

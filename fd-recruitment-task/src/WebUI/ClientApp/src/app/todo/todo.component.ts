@@ -1,5 +1,5 @@
 import { Component, TemplateRef, OnInit } from '@angular/core';
-import {FormArray, FormBuilder, FormControl, FormGroup} from '@angular/forms';
+import {FormArray, FormBuilder, FormGroup} from '@angular/forms';
 import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
 import {
   TodoListsClient, TodoItemsClient,
@@ -29,6 +29,8 @@ export class TodoComponent implements OnInit {
   deleteListModalRef: BsModalRef;
   itemDetailsModalRef: BsModalRef;
   itemDetailsFormGroup: any = {};
+  selectedTagName: string = null;
+
   createTagsFormArray(tags: TagsDto[]): FormGroup[] {
     const tagsFormArray: FormGroup[] = [];
     if (tags && tags.length) {
@@ -49,6 +51,34 @@ export class TodoComponent implements OnInit {
   get tags(): FormArray {
     return this.itemDetailsFormGroup.get('tags') as FormArray;
   }
+
+  filteredItems(items: TodoItemDto[]): TodoItemDto[] {
+    if (!this.selectedTagName) {
+      return items;
+    }
+    return items.filter(item => item.tags.some(tag => tag.name === this.selectedTagName));
+  }
+
+  getUniqueTagNames(): string[] {
+    let uniqueTagNames = new Set<string>();
+
+    this.selectedList.items.forEach(item => {
+      item.tags.forEach(tag => {
+        uniqueTagNames.add(tag.name);
+      });
+    });
+
+    return Array.from(uniqueTagNames);
+  }
+
+  hasNonEmptyTags(): boolean {
+    return this.selectedList.items.some((item: any) => item.tags.length > 0);
+  }
+
+  clearSelection() {
+    this.selectedTagName = null;
+  }
+
 
   addTag() {
     let newTag = new TagsDto({
@@ -77,6 +107,7 @@ export class TodoComponent implements OnInit {
       result => {
         this.lists = result.lists;
         this.priorityLevels = result.priorityLevels;
+
         if (this.lists.length) {
           this.selectedList = this.lists[0];
         }
@@ -221,7 +252,6 @@ export class TodoComponent implements OnInit {
       }
     );
   }
-
 
   addItem() {
     const item = {

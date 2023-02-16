@@ -3,7 +3,6 @@ using AutoMapper.QueryableExtensions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Todo_App.Application.Common.Interfaces;
-using Todo_App.Domain.Enums;
 
 namespace Todo_App.Application.Tags.Queries;
 
