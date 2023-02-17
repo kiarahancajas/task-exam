@@ -16,6 +16,10 @@ public class UpdateTodoListCommandValidator : AbstractValidator<UpdateTodoListCo
             .NotEmpty().WithMessage("Title is required.")
             .MaximumLength(200).WithMessage("Title must not exceed 200 characters.")
             .MustAsync(BeUniqueTitle).WithMessage("The specified title already exists.");
+        
+        RuleFor(v => v.Colour)
+            .NotEmpty().WithMessage("Colour code is required.")
+            .MaximumLength(7).WithMessage("Colour code must not exceed 7 characters");
     }
 
     public async Task<bool> BeUniqueTitle(UpdateTodoListCommand model, string title, CancellationToken cancellationToken)

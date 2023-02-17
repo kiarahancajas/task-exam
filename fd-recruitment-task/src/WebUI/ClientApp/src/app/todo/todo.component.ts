@@ -28,12 +28,15 @@ export class TodoComponent implements OnInit {
   listOptionsModalRef: BsModalRef;
   deleteListModalRef: BsModalRef;
   itemDetailsModalRef: BsModalRef;
-  itemDetailsFormGroup = this.fb.group({
-    id: [null],
-    listId: [null],
-    priority: [''],
-    note: ['']
-  });
+  itemDetailsFormGroup: any ={};
+  supportedColours = [  { name: 'White', value: '#FFFFFF' },
+    { name: 'Red', value: '#FF5733' },
+    { name: 'Orange', value: '#FFC300' },
+    { name: 'Yellow', value: '#FFFF66' },
+    { name: 'Green', value: '#CCFF99' },
+    { name: 'Blue', value: '#6666FF' },
+    { name: 'Purple', value: '#9966CC' },
+    { name: 'Grey', value: '#999999' }];
 
 
   constructor(
@@ -75,6 +78,7 @@ export class TodoComponent implements OnInit {
     const list = {
       id: 0,
       title: this.newListEditor.title,
+      colour: this.newListEditor.colour,
       items: []
     } as TodoListDto;
 
@@ -101,7 +105,8 @@ export class TodoComponent implements OnInit {
   showListOptionsModal(template: TemplateRef<any>) {
     this.listOptionsEditor = {
       id: this.selectedList.id,
-      title: this.selectedList.title
+      title: this.selectedList.title,
+      colour: this.selectedList.colour
     };
 
     this.listOptionsModalRef = this.modalService.show(template);
@@ -111,8 +116,9 @@ export class TodoComponent implements OnInit {
     const list = this.listOptionsEditor as UpdateTodoListCommand;
     this.listsClient.update(this.selectedList.id, list).subscribe(
       () => {
-        (this.selectedList.title = this.listOptionsEditor.title),
-          this.listOptionsModalRef.hide();
+        this.selectedList.title = this.listOptionsEditor.title;
+        this.selectedList.colour = this.listOptionsEditor.colour;
+        this.listOptionsModalRef.hide();
         this.listOptionsEditor = {};
       },
       error => console.error(error)
@@ -138,12 +144,26 @@ export class TodoComponent implements OnInit {
   // Items
   showItemDetailsModal(template: TemplateRef<any>, item: TodoItemDto): void {
     this.selectedItem = item;
+
+    this.itemDetailsFormGroup = this.fb.group({
+      id: [null],
+      listId: [null],
+      priority: [''],
+      note: [''],
+      colour: ['']
+    });
+
     this.itemDetailsFormGroup.patchValue(this.selectedItem);
+
 
     this.itemDetailsModalRef = this.modalService.show(template);
     this.itemDetailsModalRef.onHidden.subscribe(() => {
         this.stopDeleteCountDown();
     });
+  }
+
+  setColour(value: string) {
+    this.itemDetailsFormGroup.get('colour').setValue(value);
   }
 
   updateItemDetails(): void {
@@ -163,6 +183,7 @@ export class TodoComponent implements OnInit {
 
         this.selectedItem.priority = item.priority;
         this.selectedItem.note = item.note;
+        this.selectedItem.colour = item.colour;
         this.itemDetailsModalRef.hide();
         this.itemDetailsFormGroup.reset();
       },

@@ -17,6 +17,11 @@ public class Colour : ValueObject
 
     public static Colour From(string code)
     {
+        if (code == null)
+        {
+            throw new ArgumentNullException(nameof(code));
+        }
+            
         var colour = new Colour { Code = code };
 
         if (!SupportedColours.Contains(colour))
@@ -35,7 +40,7 @@ public class Colour : ValueObject
 
     public static Colour Yellow => new("#FFFF66");
 
-    public static Colour Green => new("#CCFF99 ");
+    public static Colour Green => new("#CCFF99");
 
     public static Colour Blue => new("#6666FF");
 

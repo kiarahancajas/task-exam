@@ -29,7 +29,7 @@
         </li>
       </ul>
     </div>
-    <div class="col-sm-8" *ngIf="selectedList">
+    <div class="col-sm-8" *ngIf="selectedList" [ngStyle]="{'background-color': selectedList.colour}">
       <div class="clearfix">
         <h2 class="float-start">{{ selectedList.title }}</h2>
         <button id="listOptions" class="btn btn-default float-end" title="List Options..."
@@ -38,7 +38,7 @@
         </button>
       </div>
       <ul id="todo-items" class="list-group mb-2">
-        <li class="list-group-item" *ngFor="let item of selectedList.items; index as i">
+        <li class="list-group-item" *ngFor="let item of selectedList.items; index as i" [ngStyle]="{'background-color': item.colour}">
           <div class="d-flex">
             <div class="todo-item-checkbox">
               <input type="checkbox" [(ngModel)]="item.done" (change)="updateItem(item)" />
@@ -85,6 +85,13 @@
       <input type="text" class="form-control" id="inputListTitle" placeholder="List name..."
         [(ngModel)]="listOptionsEditor.title" (keyup.enter)="updateListOptions()" />
     </div>
+    <div class="form-group">
+      <label for="inputListColour">Colour</label>
+      <select class="form-control" id="inputListColour"
+              [(ngModel)]="listOptionsEditor.colour">
+        <option *ngFor="let colour of supportedColours" [value]="colour.value">{{ colour.name }}</option>
+      </select>
+    </div>
     <div *ngIf="debug">
       <pre>{{ listOptionsEditor | json }}</pre>
     </div>
@@ -126,6 +133,12 @@
       <div class="form-group">
         <label for="note">Note</label>
         <textarea id="note" class="form-control" rows="3" formControlName="note"></textarea>
+      </div>
+      <div class="form-group">
+        <label for="inputItemColour">Colour</label>
+        <select class="form-control" id="inputItemColour" formControlName="colour">
+          <option *ngFor="let color of supportedColours" [ngValue]="color.value">{{ color.name }}</option>
+        </select>
       </div>
     </form>
     <div *ngIf="debug">
@@ -178,6 +191,14 @@
       <label for="title">Title</label>
       <input type="text" class="form-control" id="title" placeholder="List title..." [(ngModel)]="newListEditor.title"
         [ngClass]="{ 'is-invalid': newListEditor.error }" (keyup.enter)="addList()" />
+      <div *ngIf="newListEditor.error" class="invalid-feedback">
+        {{ newListEditor.error }}
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="colour">Colour</label>
+      <input type="text" class="form-control" id="colour" placeholder="Background colour..." [(ngModel)]="newListEditor.colour"
+             [ngClass]="{ 'is-invalid': newListEditor.error }" (keyup.enter)="addList()" />
       <div *ngIf="newListEditor.error" class="invalid-feedback">
         {{ newListEditor.error }}
       </div>

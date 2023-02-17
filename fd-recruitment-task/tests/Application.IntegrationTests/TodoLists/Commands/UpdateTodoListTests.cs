@@ -23,18 +23,21 @@ public class UpdateTodoListTests : BaseTestFixture
     {
         var listId = await SendAsync(new CreateTodoListCommand
         {
-            Title = "New List"
+            Title = "New List",
+            Colour = "#FFFFFF"
         });
 
         await SendAsync(new CreateTodoListCommand
         {
-            Title = "Other List"
+            Title = "Other List",
+            Colour = "#FFFFFF"
         });
 
         var command = new UpdateTodoListCommand
         {
             Id = listId,
-            Title = "Other List"
+            Title = "Other List",
+            Colour = "#FFFFFF"
         };
 
         (await FluentActions.Invoking(() =>
@@ -50,13 +53,15 @@ public class UpdateTodoListTests : BaseTestFixture
 
         var listId = await SendAsync(new CreateTodoListCommand
         {
-            Title = "New List"
+            Title = "New List",
+            Colour = "#FFFFFF"
         });
 
         var command = new UpdateTodoListCommand
         {
             Id = listId,
-            Title = "Updated List Title"
+            Title = "Updated List Title",
+            Colour = "#FFFFFF"
         };
 
         await SendAsync(command);
@@ -65,6 +70,7 @@ public class UpdateTodoListTests : BaseTestFixture
 
         list.Should().NotBeNull();
         list!.Title.Should().Be(command.Title);
+        list.Colour.Code.Should().Be(command.Colour);
         list.LastModifiedBy.Should().NotBeNull();
         list.LastModifiedBy.Should().Be(userId);
         list.LastModified.Should().NotBeNull();

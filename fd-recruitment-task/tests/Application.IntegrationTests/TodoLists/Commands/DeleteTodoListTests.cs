@@ -23,7 +23,8 @@ public class DeleteTodoListTests : BaseTestFixture
     {
         var listId = await SendAsync(new CreateTodoListCommand
         {
-            Title = "New List"
+            Title = "New List",
+            Colour = "#FFFFFF"
         });
 
         await SendAsync(new DeleteTodoListCommand(listId));
