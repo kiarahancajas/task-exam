@@ -33,14 +33,15 @@ public class GetTodosTests : BaseTestFixture
             Colour = Colour.Blue,
             Items =
                     {
-                        new TodoItem { Title = "Apples", Done = true },
-                        new TodoItem { Title = "Milk", Done = true },
-                        new TodoItem { Title = "Bread", Done = true },
-                        new TodoItem { Title = "Toilet paper" },
-                        new TodoItem { Title = "Pasta" },
-                        new TodoItem { Title = "Tissues" },
-                        new TodoItem { Title = "Tuna" }
-                    }
+                        new TodoItem { Title = "Apples", Done = true, IsSoftDeleted = false },
+                        new TodoItem { Title = "Milk", Done = true, IsSoftDeleted = false },
+                        new TodoItem { Title = "Bread", Done = true, IsSoftDeleted = false },
+                        new TodoItem { Title = "Toilet paper", IsSoftDeleted = true},
+                        new TodoItem { Title = "Pasta", IsSoftDeleted = false },
+                        new TodoItem { Title = "Tissues", IsSoftDeleted = false },
+                        new TodoItem { Title = "Tuna", IsSoftDeleted = false }
+                    },
+            IsSoftDeleted = false
         });
 
         var query = new GetTodosQuery();
@@ -48,7 +49,7 @@ public class GetTodosTests : BaseTestFixture
         var result = await SendAsync(query);
 
         result.Lists.Should().HaveCount(1);
-        result.Lists.First().Items.Should().HaveCount(7);
+        result.Lists.First().Items.Should().HaveCount(6);
     }
 
     [Test]

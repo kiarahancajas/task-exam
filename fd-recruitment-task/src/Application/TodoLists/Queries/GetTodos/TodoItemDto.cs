@@ -17,6 +17,8 @@ public class TodoItemDto : IMapFrom<TodoItem>
     public int Priority { get; set; }
 
     public string? Note { get; set; }
+    
+    public bool IsSoftDeleted { get; set; }
 
     public void Mapping(Profile profile)
     {

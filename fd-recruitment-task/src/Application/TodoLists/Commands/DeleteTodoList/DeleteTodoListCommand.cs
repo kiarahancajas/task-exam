@@ -27,9 +27,9 @@ public class DeleteTodoListCommandHandler : IRequestHandler<DeleteTodoListComman
         {
             throw new NotFoundException(nameof(TodoList), request.Id);
         }
-
-        _context.TodoLists.Remove(entity);
-
+        
+        entity.IsSoftDeleted = true;
+        _context.TodoLists.Update(entity);
         await _context.SaveChangesAsync(cancellationToken);
 
         return Unit.Value;
