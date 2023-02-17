@@ -26,13 +26,14 @@ public class UpdateTodoItemTests : BaseTestFixture
 
         var listId = await SendAsync(new CreateTodoListCommand
         {
-            Title = "New List"
+            Title = "New List",
+            Colour = "#FFFFFF"
         });
 
         var itemId = await SendAsync(new CreateTodoItemCommand
         {
             ListId = listId,
-            Title = "New Item"
+            Title = "New Item",
         });
 
         var command = new UpdateTodoItemCommand
