@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Todo_App.Infrastructure.Persistence;
 
@@ -11,9 +12,10 @@ using Todo_App.Infrastructure.Persistence;
 namespace Todo_App.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230213093940_addTagsTable")]
+    partial class addTagsTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -325,6 +327,9 @@ namespace Todo_App.Infrastructure.Persistence.Migrations
 
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("TagId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 

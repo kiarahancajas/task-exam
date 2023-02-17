@@ -5,7 +5,31 @@
 <p *ngIf="!lists"><em>Loading...</em></p>
 
 <div *ngIf="lists">
-
+  <div class="row" id="todo-filter-search-container">
+    <div class="col-sm-8">
+      <h5>Anayltics:</h5>
+      <div>
+        <ng-container *ngFor="let tag of this.selectedListAnalytics.tagAnalytics">
+          <span class="badge bg-info" id="tag-analytics-badge">
+            {{ tag.tagName }} &nbsp; <span class="badge bg-secondary">{{tag.count}}</span>
+          </span>
+        </ng-container>
+      </div>
+    </div>
+    <div class="col-sm-4 text-right">
+      <div class="form-group" *ngIf="hasNonEmptyTags()">
+        <label for="filterTags" class="float-start">Filter by Tags:</label>
+        <button type="button" class="btn btn-default float-end" (click)="clearSelection()">
+          <i class="bi bi-arrow-clockwise"></i>
+        </button>
+        <select class="form-select" [(ngModel)]="selectedTagName" id="filterTags">
+          <ng-container *ngFor="let tagName of getUniqueTagNames()">
+            <option [value]="tagName">{{ tagName }}</option>
+          </ng-container>
+        </select>
+      </div>
+    </div>
+  </div>
   <div class="row">
     <div class="col-sm-4">
       <div class="clearfix">
@@ -17,7 +41,7 @@
       </div>
       <ul class="list-group">
         <li *ngFor="let list of lists; index as i" class="list-group-item"
-          [ngClass]="{ 'active': selectedList == list }" (click)="selectedList = list">
+          [ngClass]="{ 'active': selectedList == list }" (click)="onListSelected(list)">
           <div class="clearfix">
             <div class="float-start">
               {{ list.title }}
@@ -38,31 +62,33 @@
         </button>
       </div>
       <ul id="todo-items" class="list-group mb-2">
-        <li class="list-group-item" *ngFor="let item of selectedList.items; index as i">
-          <div class="d-flex">
-            <div class="todo-item-checkbox">
-              <input type="checkbox" [(ngModel)]="item.done" (change)="updateItem(item)" />
-            </div>
-            <div class="flex-fill">
-              <input id="{{ 'itemTitle' + i }}" *ngIf="item == selectedItem" type="text"
-                class="form-control item-input-control" [(ngModel)]="item.title" (keyup.enter)="updateItem(item, true)"
-                (blur)="updateItem(item)" autofocus="autofocus" />
-              <div class="todo-item-title" *ngIf="item != selectedItem" [ngClass]="{ 'done-todo': item.done }"
-                (click)="editItem(item, 'itemTitle' + i)" class="form-control item-input-control">
-                <span>{{ item.title }}</span>
+        <li class="list-group-item" *ngFor="let item of filteredItems(this.selectedList.items); index as i">
+            <div class="d-flex">
+              <div class="todo-item-checkbox">
+                <input type="checkbox" [(ngModel)]="item.done" (change)="updateItem(item)" />
+              </div>
+              <div class="flex-fill">
+                <input id="{{ 'itemTitle' + i }}" *ngIf="item == selectedItem" type="text"
+                       class="form-control item-input-control" [(ngModel)]="item.title" (keyup.enter)="updateItem(item, true)"
+                       (blur)="updateItem(item)" autofocus="autofocus" />
+                <div class="todo-item-title" *ngIf="item != selectedItem" [ngClass]="{ 'done-todo': item.done }"
+                     (click)="editItem(item, 'itemTitle' + i)" class="form-control item-input-control">
+                  <span>{{ item.title }}</span>
+                </div>
+              </div>
+              <div class="todo-item-commands">
+                <button *ngIf="item.id != 0" (click)="showItemDetailsModal(itemDetailsModalTemplate, item)"
+                        class="btn btn-default btn-xs" role="button">
+                  <i class="bi bi-three-dots-vertical"></i>
+                </button>
               </div>
             </div>
-            <div class="todo-item-commands">
-              <button *ngIf="item.id != 0" (click)="showItemDetailsModal(itemDetailsModalTemplate, item)"
-                class="btn btn-default btn-xs" role="button">
-                <i class="bi bi-three-dots-vertical"></i>
-              </button>
-            </div>
-          </div>
         </li>
-        <li class="list-group-item" (click)="addItem()">
-          <button class="btn btn-default">Add Item...</button>
-        </li>
+        <ng-container *ngIf="!selectedTagName">
+          <li class="list-group-item" (click)="addItem()">
+            <button class="btn btn-default">Add Item...</button>
+          </li>
+        </ng-container>
       </ul>
     </div>
   </div>
@@ -126,6 +152,26 @@
       <div class="form-group">
         <label for="note">Note</label>
         <textarea id="note" class="form-control" rows="3" formControlName="note"></textarea>
+      </div>
+      <div class="form-group">
+        <label for="tags">Tags</label>
+        <div formArrayName="tags" class="form-inline">
+          <div *ngFor="let tag of tags.controls; index as i">
+                <div [formGroupName]="i" id="todo-items-tags">
+                  <input type="text" class="form-control mr-2 d-inline-block" formControlName="name" [value]="tag.value.name"
+                  [ngClass]="{ 'is-invalid': itemDetailsFormGroup.error }"/>
+                  <div *ngIf="itemDetailsFormGroup.error" class="invalid-feedback">
+                    {{ itemDetailsFormGroup.error }}
+                  </div>
+                  <input type="hidden" class="form-control" formControlName="itemId" [value]="tag.value.itemId"/>
+                  <input type="hidden" class="form-control" formControlName="id" [value]="tag.value.id"/>
+                  <button class="btn btn-default float-end d-inline-block" title="Remove Tag" (click)="removeTag(i)">
+                    <i class="bi bi-trash"></i>
+                  </button>
+            </div>
+          </div>
+          <button class="btn btn-default ml-2 d-inline-block" (click)="addTag()">Add Tag</button>
+        </div>
       </div>
     </form>
     <div *ngIf="debug">

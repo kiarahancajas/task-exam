@@ -1,6 +1,7 @@
 ﻿using FluentAssertions;
 using NUnit.Framework;
 using Todo_App.Application.Common.Exceptions;
+using Todo_App.Application.Tags.Queries;
 using Todo_App.Application.TodoItems.Commands.CreateTodoItem;
 using Todo_App.Application.TodoItems.Commands.UpdateTodoItem;
 using Todo_App.Application.TodoItems.Commands.UpdateTodoItemDetail;
@@ -42,20 +43,59 @@ public class UpdateTodoItemDetailTests : BaseTestFixture
             Id = itemId,
             ListId = listId,
             Note = "A1",
-            Priority = PriorityLevel.High
+            Priority = PriorityLevel.High,
+            Tags = new List<TagsDto>
+            {
+                new TagsDto {ItemId = itemId,Name = "Sample"}
+            }
         };
 
         await SendAsync(command);
+        var query = new GetTagsQuery();
 
+        var result = await SendAsync(query);
+        
         var item = await FindAsync<TodoItem>(itemId);
 
         item.Should().NotBeNull();
+        result.Should().NotBeNull();
         item!.ListId.Should().Be(command.ListId);
+        result.AllTags.Where(x => x.ItemId == item.Id).Should().NotBeNull();
         item.Note.Should().Be(command.Note);
         item.Priority.Should().Be(command.Priority);
         item.LastModifiedBy.Should().NotBeNull();
         item.LastModifiedBy.Should().Be(userId);
         item.LastModified.Should().NotBeNull();
         item.LastModified.Should().BeCloseTo(DateTime.Now, TimeSpan.FromMilliseconds(10000));
+    }
+
+    [Test]
+    public async Task ShouldReturnInvalidTagName()
+    {
+        var listId = await SendAsync(new CreateTodoListCommand
+        {
+            Title = "New List"
+        });
+
+        var itemId = await SendAsync(new CreateTodoItemCommand
+        {
+            ListId = listId,
+            Title = "New Item"
+        });
+        
+        var modifyItemOne = new UpdateTodoItemDetailCommand
+        {
+            Id = itemId,
+            ListId = listId,
+            Note = "A1",
+            Priority = PriorityLevel.High,
+            Tags = new List<TagsDto>
+            {
+                new TagsDto {ItemId = itemId,Name = "Sample"},
+                new TagsDto {ItemId = itemId,Name = "Sample"}
+            }
+        };
+        
+       await FluentActions.Invoking(() => SendAsync(modifyItemOne)).Should().ThrowAsync<ValidationException>();
     }
 }

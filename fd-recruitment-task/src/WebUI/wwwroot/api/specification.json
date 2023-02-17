@@ -364,6 +364,37 @@
         }
       }
     },
+    "/api/TodoLists/GetListAnalytics": {
+      "get": {
+        "tags": [
+          "TodoLists"
+        ],
+        "operationId": "TodoLists_GetListAnalytics",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListAnalyticsDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/WeatherForecast": {
       "get": {
         "tags": [
@@ -438,6 +469,30 @@
           },
           "done": {
             "type": "boolean"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TagsDto"
+            }
+          }
+        }
+      },
+      "TagsDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "itemId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
           }
         }
       },
@@ -490,6 +545,13 @@
           "note": {
             "type": "string",
             "nullable": true
+          },
+          "tags": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/TagsDto"
+            }
           }
         }
       },
@@ -591,6 +653,12 @@
           "note": {
             "type": "string",
             "nullable": true
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TagsDto"
+            }
           }
         }
       },
@@ -615,6 +683,35 @@
           "title": {
             "type": "string",
             "nullable": true
+          }
+        }
+      },
+      "ListAnalyticsDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "listId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "tagAnalytics": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TagAnalyticsDto"
+            }
+          }
+        }
+      },
+      "TagAnalyticsDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "tagName": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },

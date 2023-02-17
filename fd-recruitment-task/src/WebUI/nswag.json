@@ -114,7 +114,7 @@
       "inlineNamedDictionaries": false,
       "inlineNamedAny": false,
       "includeHttpContext": false,
-      "templateDirectory": null,
+      "templateDirectory": "wwwroot/CustomTemplates/",
       "typeNameGeneratorType": null,
       "propertyNameGeneratorType": null,
       "enumNameGeneratorType": null,
