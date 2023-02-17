@@ -29,6 +29,15 @@ export class TodoComponent implements OnInit {
   deleteListModalRef: BsModalRef;
   itemDetailsModalRef: BsModalRef;
   itemDetailsFormGroup: any ={};
+  supportedColours = [  { name: 'White', value: '#FFFFFF' },
+    { name: 'Red', value: '#FF5733' },
+    { name: 'Orange', value: '#FFC300' },
+    { name: 'Yellow', value: '#FFFF66' },
+    { name: 'Green', value: '#CCFF99' },
+    { name: 'Blue', value: '#6666FF' },
+    { name: 'Purple', value: '#9966CC' },
+    { name: 'Grey', value: '#999999' }];
+
 
   constructor(
     private listsClient: TodoListsClient,
@@ -174,6 +183,7 @@ export class TodoComponent implements OnInit {
 
         this.selectedItem.priority = item.priority;
         this.selectedItem.note = item.note;
+        this.selectedItem.colour = item.colour;
         this.itemDetailsModalRef.hide();
         this.itemDetailsFormGroup.reset();
       },

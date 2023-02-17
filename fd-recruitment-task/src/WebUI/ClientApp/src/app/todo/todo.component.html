@@ -86,9 +86,11 @@
         [(ngModel)]="listOptionsEditor.title" (keyup.enter)="updateListOptions()" />
     </div>
     <div class="form-group">
-      <label for="inputListTitle">Colour</label>
-      <input type="text" class="form-control" id="inputListColour" placeholder="List colour..."
-             [(ngModel)]="listOptionsEditor.colour" (keyup.enter)="updateListOptions()" />
+      <label for="inputListColour">Colour</label>
+      <select class="form-control" id="inputListColour"
+              [(ngModel)]="listOptionsEditor.colour">
+        <option *ngFor="let colour of supportedColours" [value]="colour.value">{{ colour.name }}</option>
+      </select>
     </div>
     <div *ngIf="debug">
       <pre>{{ listOptionsEditor | json }}</pre>
@@ -134,8 +136,9 @@
       </div>
       <div class="form-group">
         <label for="inputItemColour">Colour</label>
-        <input type="text" class="form-control" id="inputItemColour" placeholder="Item colour..." formControlName="colour"
-               [value]="itemDetailsFormGroup.get('colour').value"/>
+        <select class="form-control" id="inputItemColour" formControlName="colour">
+          <option *ngFor="let color of supportedColours" [ngValue]="color.value">{{ color.name }}</option>
+        </select>
       </div>
     </form>
     <div *ngIf="debug">
