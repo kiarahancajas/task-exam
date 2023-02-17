@@ -6,7 +6,16 @@
 
 <div *ngIf="lists">
   <div class="row" id="todo-filter-search-container">
-    <div class="col-sm-8"></div>
+    <div class="col-sm-8">
+      <h5>Anayltics:</h5>
+      <div>
+        <ng-container *ngFor="let tag of this.selectedListAnalytics.tagAnalytics">
+          <span class="badge bg-info" id="tag-analytics-badge">
+            {{ tag.tagName }} &nbsp; <span class="badge bg-secondary">{{tag.count}}</span>
+          </span>
+        </ng-container>
+      </div>
+    </div>
     <div class="col-sm-4 text-right">
       <div class="form-group" *ngIf="hasNonEmptyTags()">
         <label for="filterTags" class="float-start">Filter by Tags:</label>
@@ -32,7 +41,7 @@
       </div>
       <ul class="list-group">
         <li *ngFor="let list of lists; index as i" class="list-group-item"
-          [ngClass]="{ 'active': selectedList == list }" (click)="selectedList = list">
+          [ngClass]="{ 'active': selectedList == list }" (click)="onListSelected(list)">
           <div class="clearfix">
             <div class="float-start">
               {{ list.title }}

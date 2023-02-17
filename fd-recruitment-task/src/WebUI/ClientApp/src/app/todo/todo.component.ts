@@ -30,6 +30,31 @@ export class TodoComponent implements OnInit {
   itemDetailsModalRef: BsModalRef;
   itemDetailsFormGroup: any = {};
   selectedTagName: string = null;
+  selectedListAnalytics: any = {};
+
+  constructor(
+    private listsClient: TodoListsClient,
+    private itemsClient: TodoItemsClient,
+    private modalService: BsModalService,
+    private fb: FormBuilder
+  ) {}
+
+
+  ngOnInit(): void {
+    this.listsClient.get().subscribe(
+      result => {
+        this.lists = result.lists;
+        this.priorityLevels = result.priorityLevels;
+
+        if (this.lists.length) {
+          this.selectedList = this.lists[0];
+          this.fetchListAnalytics(this.selectedList.id);
+        }
+      },
+      error => console.error(error)
+    );
+  }
+
 
   createTagsFormArray(tags: TagsDto[]): FormGroup[] {
     const tagsFormArray: FormGroup[] = [];
@@ -57,6 +82,20 @@ export class TodoComponent implements OnInit {
       return items;
     }
     return items.filter(item => item.tags.some(tag => tag.name === this.selectedTagName));
+  }
+
+  onListSelected(list: any) {
+    this.selectedList = list;
+    this.fetchListAnalytics(list.id);
+  }
+
+  fetchListAnalytics(id: number) {
+    this.listsClient.getListAnalytics(id).subscribe(
+      result => {
+        this.selectedListAnalytics = result;
+      },
+      error => console.error(error)
+    );
   }
 
   getUniqueTagNames(): string[] {
@@ -92,28 +131,6 @@ export class TodoComponent implements OnInit {
   removeTag(index) {
     let tagsArray = this.itemDetailsFormGroup.get('tags') as FormArray;
     tagsArray.removeAt(index);
-  }
-
-  constructor(
-    private listsClient: TodoListsClient,
-    private itemsClient: TodoItemsClient,
-    private modalService: BsModalService,
-    private fb: FormBuilder
-  ) {}
-
-
-  ngOnInit(): void {
-    this.listsClient.get().subscribe(
-      result => {
-        this.lists = result.lists;
-        this.priorityLevels = result.priorityLevels;
-
-        if (this.lists.length) {
-          this.selectedList = this.lists[0];
-        }
-      },
-      error => console.error(error)
-    );
   }
 
   // Lists
@@ -173,8 +190,8 @@ export class TodoComponent implements OnInit {
     const list = this.listOptionsEditor as UpdateTodoListCommand;
     this.listsClient.update(this.selectedList.id, list).subscribe(
       () => {
-        (this.selectedList.title = this.listOptionsEditor.title),
-          this.listOptionsModalRef.hide();
+        this.selectedList.title = this.listOptionsEditor.title;
+        this.listOptionsModalRef.hide();
         this.listOptionsEditor = {};
       },
       error => console.error(error)
@@ -235,6 +252,7 @@ export class TodoComponent implements OnInit {
         this.selectedItem.priority = item.priority;
         this.selectedItem.note = item.note;
         this.selectedItem.tags = item.tags;
+        this.fetchListAnalytics(this.selectedList.id);
 
         this.itemDetailsModalRef.hide();
         this.itemDetailsFormGroup.reset();
@@ -331,10 +349,12 @@ export class TodoComponent implements OnInit {
       this.selectedList.items.splice(itemIndex, 1);
     } else {
       this.itemsClient.delete(item.id).subscribe(
-        () =>
-        (this.selectedList.items = this.selectedList.items.filter(
-          t => t.id !== item.id
-        )),
+        () => {
+          this.selectedList.items = this.selectedList.items.filter(
+            t => t.id !== item.id
+          );
+          this.fetchListAnalytics(this.selectedList.id);
+        },
         error => console.error(error)
       );
     }

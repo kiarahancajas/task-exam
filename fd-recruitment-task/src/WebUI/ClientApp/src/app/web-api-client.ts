@@ -312,6 +312,7 @@ export interface ITodoListsClient {
     get2(id: number): Observable<FileResponse>;
     update(id: number, command: UpdateTodoListCommand): Observable<FileResponse>;
     delete(id: number): Observable<FileResponse>;
+    getListAnalytics(id: number | undefined): Observable<ListAnalyticsDto>;
 }
 
 @Injectable({
@@ -571,6 +572,58 @@ export class TodoListsClient implements ITodoListsClient {
             const fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
             const fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
             return _observableOf({ fileName: fileName, data: responseBlob as any, status: status, headers: _headers });
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    getListAnalytics(id: number | undefined): Observable<ListAnalyticsDto> {
+        let url_ = this.baseUrl + "/api/TodoLists/GetListAnalytics?";
+        if (id === null)
+            throw new Error("The parameter 'id' cannot be null.");
+        else if (id !== undefined)
+            url_ += "id=" + encodeURIComponent("" + id) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetListAnalytics(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetListAnalytics(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<ListAnalyticsDto>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<ListAnalyticsDto>;
+        }));
+    }
+
+    protected processGetListAnalytics(response: HttpResponseBase): Observable<ListAnalyticsDto> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = ListAnalyticsDto.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
@@ -1287,6 +1340,97 @@ export class UpdateTodoListCommand implements IUpdateTodoListCommand {
 export interface IUpdateTodoListCommand {
     id?: number;
     title?: string | undefined;
+}
+
+export class ListAnalyticsDto implements IListAnalyticsDto {
+    listId?: number;
+    tagAnalytics?: TagAnalyticsDto[];
+
+    constructor(data?: IListAnalyticsDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.listId = _data["listId"];
+            if (Array.isArray(_data["tagAnalytics"])) {
+                this.tagAnalytics = [] as any;
+                for (let item of _data["tagAnalytics"])
+                    this.tagAnalytics!.push(TagAnalyticsDto.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): ListAnalyticsDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new ListAnalyticsDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["listId"] = this.listId;
+        if (Array.isArray(this.tagAnalytics)) {
+            data["tagAnalytics"] = [];
+            for (let item of this.tagAnalytics)
+        {
+        	var objTagAnalyticsDto = new TagAnalyticsDto(item);
+        	data["tagAnalytics"].push(objTagAnalyticsDto.toJSON());
+        }
+        }
+        return data;
+    }
+}
+
+export interface IListAnalyticsDto {
+    listId?: number;
+    tagAnalytics?: TagAnalyticsDto[];
+}
+
+export class TagAnalyticsDto implements ITagAnalyticsDto {
+    tagName?: string;
+    count?: number;
+
+    constructor(data?: ITagAnalyticsDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.tagName = _data["tagName"];
+            this.count = _data["count"];
+        }
+    }
+
+    static fromJS(data: any): TagAnalyticsDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new TagAnalyticsDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["tagName"] = this.tagName;
+        data["count"] = this.count;
+        return data;
+    }
+}
+
+export interface ITagAnalyticsDto {
+    tagName?: string;
+    count?: number;
 }
 
 export class WeatherForecast implements IWeatherForecast {

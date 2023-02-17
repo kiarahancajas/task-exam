@@ -49,4 +49,10 @@ public class TodoListsController : ApiControllerBase
 
         return NoContent();
     }
+    
+    [HttpGet("[action]")]
+    public async Task<ActionResult<ListAnalyticsDto>> GetListAnalytics(int id)
+    {
+        return await Mediator.Send(new GetListAnalyticsQuery(id));
+    }
 }
