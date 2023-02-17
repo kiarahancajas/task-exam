@@ -28,13 +28,7 @@ export class TodoComponent implements OnInit {
   listOptionsModalRef: BsModalRef;
   deleteListModalRef: BsModalRef;
   itemDetailsModalRef: BsModalRef;
-  itemDetailsFormGroup = this.fb.group({
-    id: [null],
-    listId: [null],
-    priority: [''],
-    note: ['']
-  });
-
+  itemDetailsFormGroup: any ={};
 
   constructor(
     private listsClient: TodoListsClient,
@@ -141,12 +135,26 @@ export class TodoComponent implements OnInit {
   // Items
   showItemDetailsModal(template: TemplateRef<any>, item: TodoItemDto): void {
     this.selectedItem = item;
+
+    this.itemDetailsFormGroup = this.fb.group({
+      id: [null],
+      listId: [null],
+      priority: [''],
+      note: [''],
+      colour: ['']
+    });
+
     this.itemDetailsFormGroup.patchValue(this.selectedItem);
+
 
     this.itemDetailsModalRef = this.modalService.show(template);
     this.itemDetailsModalRef.onHidden.subscribe(() => {
         this.stopDeleteCountDown();
     });
+  }
+
+  setColour(value: string) {
+    this.itemDetailsFormGroup.get('colour').setValue(value);
   }
 
   updateItemDetails(): void {
